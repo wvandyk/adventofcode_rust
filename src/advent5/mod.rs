@@ -1,3 +1,4 @@
+use regex::Regex;
 use general;
 
 fn contains_naughties(s: &str) -> bool {
@@ -34,14 +35,63 @@ pub fn advent5_part1() {
   println!("Advent 5, Part 1: {}", a);
 }
 
-// fn advent5_part2() {
-//   let input = read_file("advent5.txt");
-//   let mut a = 0;
+pub fn advent5_part2() {
+  let input = general::read_file("advent5.txt");
+  let mut a = 0;
 
-//   for line in input.split('\n') {
-//     if !contains_naughties(line) && contains_nices(line) && contains_vowels(line) {
-//       a += 1;
-//     }
-//   }
+  for line in input.split('\n') {
+    if repeating_pairs(line) && repeat_with_middle(line) {
+      a += 1;
+    }
+  }
 
-// }
+  println!("Advent 5, Part 2: {}", a);
+}
+
+fn offset_slices(s: &str, n: usize) -> Vec<&str> {
+    (0 .. s.len() - n + 1).map(|i| &s[i .. i + n]).collect()
+}
+
+fn repeating_pairs(s: &str) -> bool {
+  let ss = offset_slices(s, 2);
+  for sub in ss {
+    let c = s.matches(sub).count();
+    if c > 1 { return true; }
+  }
+
+  return false;
+}
+
+fn repeat_with_middle(s: &str) -> bool {
+  let ss = offset_slices(s, 3);
+  let re = Regex::new(r"(.)(.)(.)").unwrap();
+
+  for sub in ss {
+    let caps = re.captures(sub).unwrap();
+
+    let c1 = caps.at(1).unwrap();
+    let c3 = caps.at(3).unwrap();
+
+    if c1 == c3 {
+      return true;
+    }
+
+  }
+  
+  return false;
+}
+
+#[test]
+fn test_repeating_pairs() {
+  assert_eq!(repeating_pairs("aaa"), false);
+  assert_eq!(repeating_pairs("xyxy"), true);
+  assert_eq!(repeating_pairs("qjhvhtzxzqqjkmpb"), true);
+}
+
+#[test]
+fn test_repeat_with_middle() {
+  assert_eq!(repeat_with_middle("xyx"), true);
+  assert_eq!(repeat_with_middle("abcdefeghi"), true);
+  assert_eq!(repeat_with_middle("aaa"), true);
+  assert_eq!(repeat_with_middle("uurcxstgmygtbstg"), false);
+}
