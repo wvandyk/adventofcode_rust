@@ -6,7 +6,7 @@ fn deliver_presents(instructions: &Vec<char>, houses: &mut HashMap<(i32, i32), i
 
   houses.insert(pos, 1);
 
-  for d in instructions.clone() {
+  for &d in instructions {
     match d {
       '^' => pos.1 += 1,
       'v' => pos.1 -= 1,
